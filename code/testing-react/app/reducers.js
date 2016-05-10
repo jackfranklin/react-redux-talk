@@ -1,10 +1,12 @@
+import { combineReducers } from 'redux';
+
 const initialTodo = {
   name: 'buy milk',
   id: 0,
   done: false
 };
 
-function userReducer(user, action) {
+function userReducer(user = {}, action) {
   switch (action.type) {
     case 'LOG_USER_IN':
       return {
@@ -12,7 +14,7 @@ function userReducer(user, action) {
         name: action.name
       }
     case 'LOG_USER_OUT':
-      return undefined;
+      return {};
 
     default:
       return user;
@@ -48,14 +50,32 @@ function todoReducer(todos = [], action) {
 
       return todos;
 
+    case 'REQUEST_TODOS_SUCCESS':
+      return action.todos;
+
     default:
       return todos;
   }
 }
 
-export default function todoAppReducers(state = {}, action) {
-  return {
-    todos: todoReducer(state.todos, action),
-    user: userReducer(state.user, action)
-  }
-};
+function isFetchingReducer(isFetching = false, action) {
+ switch (action.type) {
+   case 'REQUEST_TODOS_INIT':
+     return true;
+
+   case 'REQUEST_TODOS_SUCCESS':
+     return false
+
+   default:
+     return isFetching
+ }
+}
+
+
+const todoAppReducers = combineReducers({
+  todos: todoReducer,
+  user: userReducer,
+  isFetching: isFetchingReducer
+});
+
+export default todoAppReducers;

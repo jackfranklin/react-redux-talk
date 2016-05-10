@@ -11,6 +11,12 @@ slidenumbers: true
 
 ---
 
+- Code, notes, etc: `github.com/jackfranklin/react-redux-talk`
+- Slides (after talk): `speakerdeck.com/jackfranklin`
+- I'll tweet them all: `twitter.com/jack_franklin`
+
+---
+
 ![fit autoplay loop](video.mp4)
 
 ---
@@ -635,7 +641,7 @@ That probably felt like a lot of effort, but the good news is once you've set Re
 
 1. Decide the shape of your state.
 2. Decide the actions that can update the state.
-3. Define your reduceers that deal with actions.
+3. Define your reducers that deal with actions.
 4. Wire up your UI to dispatch actions.
 5. Connect your components to the store to allow them to render state.
 
@@ -767,7 +773,7 @@ case 'LOG_USER_IN':
 
 case 'LOG_USER_OUT':
   return Object.assign({}, state, {
-    user: undefined
+    user: {}
   });
 ```
 
@@ -775,7 +781,7 @@ case 'LOG_USER_OUT':
 
 ```js
 export default function todoAppReducers(
-  state = { todos: [initialTodo], user: undefined },
+  state = { todos: [initialTodo], user: {} },
   action
 ) {
   switch (action.type) {
@@ -817,7 +823,7 @@ export default function todoAppReducers(
 
     case 'LOG_USER_OUT':
       return Object.assign({}, state, {
-        user: undefined
+        user: {}
       });
 
     default:
@@ -845,7 +851,7 @@ Each of these reducers is __only given their part of the state__.
 ---
 
 ```js
-function userReducer(user, action) {
+function userReducer(user = {}, action) {
   switch (action.type) {
     case 'LOG_USER_IN':
       return {
@@ -853,7 +859,7 @@ function userReducer(user, action) {
         name: action.name
       }
     case 'LOG_USER_OUT':
-      return undefined;
+      return {};
 
     default:
       return user;
@@ -893,5 +899,415 @@ export default function todoAppReducers(state = {}, action) {
   }
 };
 ```
+
+---
+
+Now as our state grows we'll add new functions for each key.
+
+Turns out this pattern is so useful that Redux provides a method to do it for us: `combineReducers`.
+
+---
+
+Before:
+
+```js
+export default function todoAppReducers(state = {}, action) {
+  return {
+    todos: todoReducer(state.todos, action),
+    user: userReducer(state.user, action)
+  }
+};
+```
+
+---
+
+After:
+
+```js
+import { combineReducers } from 'redux';
+...
+
+const todoAppReducers = combineReducers({
+  todos: todoReducer,
+  user: userReducer
+});
+
+export default todoAppReducers;
+```
+
+---
+
+# Deep breath again!
+
+---
+
+# Middlewares
+
+---
+
+You might be familiar with Rack Middlewares, NodeJS / Express middlewares, and so on.
+
+> It provides a third-party extension point between dispatching an action, and the moment it reaches the reducer
+
+-- http://redux.js.org/docs/advanced/Middleware.html
+
+---
+
+A middleware provides a function that is given the `store` object.
+
+It should return another function that is called with `next`, the function it should call when it is finished.
+
+That function should return another function that is called with the current action, `action`.
+
+---
+
+# WHAT?!
+
+---
+
+```js
+const myMiddleware = function(store) {
+  return function(next) {
+    return function(action) {
+      // your logic goes here
+      // this is the dispatch function
+      // that each middleware can return
+    }
+  }
+}
+```
+
+```js
+const myMiddleware = store => next => action => {
+  // your logic here
+}
+```
+
+---
+
+Each middleware replaces the `dispatch` function with its own function, and Redux chains them together correctly.
+
+---
+
+# Example: logging each action
+
+---
+
+app/middlewares.js
+
+```js
+export const logMiddleware = store => next => action => {
+  console.log('MIDDLEWARE: About to dispatch', action);
+
+  return next(action);
+};
+```
+
+---
+
+app/index.js
+
+```js
+import { createStore, applyMiddleware } from 'redux';
+
+...
+
+const store = createStore(
+  todoAppReducers,
+  undefined,
+  applyMiddleware(logMiddleware)
+);
+```
+
+---
+
+![fit autoplay loop](middleware.mov)
+
+---
+
+But wait, we lost the devtools code!
+
+---
+
+# compose
+
+---
+
+```js
+const store = createStore(
+  todoAppReducers,
+  undefined,
+  compose(
+    applyMiddleware(logMiddleware),
+    window.devToolsExtension ? window.devToolsExtension() : f => f
+  )
+);
+```
+
+---
+
+# Final deep breath!
+
+---
+
+# Async Actions
+
+---
+
+Up until now we've dealt purely with synchronous actions, but often your action will be async, most commonly, data fetching.
+
+---
+
+We could write our own middleware or logic to deal with this, but one already exists: __redux-thunk__.
+
+```
+npm install --save redux-thunk
+```
+
+---
+
+With thunk, functions can either return an action or another function that can dispatch actions.
+
+---
+
+The HTTP request cycle:
+
+- Make the request, and dispatch action.
+- Get the data back, and dispatch an action with that data.
+- Request errors, dispatch an action with information about the error.
+
+When you want to dispatch an action to cause an HTTP request you actually want to trigger multiple actions.
+
+---
+
+```js
+export default function thunkMiddleware({ dispatch, getState }) {
+  return next => action => {
+    if (typeof action === 'function') {
+      return action(dispatch, getState);
+    }
+
+    return next(action);
+  };
+}
+```
+
+---
+
+Fake API:
+
+```js
+export function fetchTodos() {
+  return new Promise((resolve, reject) => {
+    resolve({
+      todos: [{
+        id: 1,
+        name: 'Buy Milk',
+        done: false
+      }]
+    })
+  });
+}
+```
+
+---
+
+We need some new information on the state:
+
+```js
+{
+  todos: ...,
+  user: ...,
+  isFetching: true / false
+}
+```
+
+---
+
+And some new actions:
+
+```js
+{ type: 'REQUEST_TODOS_INIT' },
+{ type: 'REQUEST_TODOS_SUCCESS', todos: [...] }
+// and one for error handling
+// if this were real
+```
+---
+
+```js
+function isFetchingReducer(isFetching = false, action) {
+ switch (action.type) {
+   case 'REQUEST_TODOS_INIT':
+     return true;
+
+   case 'REQUEST_TODOS_SUCCESS':
+     return false
+
+   default:
+     return isFetching
+ }
+}
+```
+
+---
+
+```js
+const todoAppReducers = combineReducers({
+  todos: todoReducer,
+  user: userReducer,
+  isFetching: isFetchingReducer
+});
+```
+
+---
+
+# Action Creators
+
+app/action-creators.js
+
+```js
+export function fetchTodosAction() {
+  return (dispatch) => {
+  }
+}
+```
+
+---
+
+app/todos.js
+
+```js
+import { fetchTodosAction } from './action-creators';
+
+
+class Todos extends React.Component {
+  componentWillMount() {
+    this.props.dispatch(fetchTodosAction());
+  }
+  ...
+}
+```
+
+---
+
+First, dispatch `REQUEST_TODOS_INIT`:
+
+```js
+export function fetchTodosAction() {
+  return (dispatch) => {
+    dispatch({ type: 'REQUEST_TODOS_INIT' });
+  }
+}
+```
+
+---
+
+```js
+import { fetchTodos } from './fake-api';
+
+export function fetchTodosAction() {
+  return (dispatch) => {
+    dispatch({ type: 'REQUEST_TODOS_INIT' });
+
+    fetchTodos().then((data) => {
+      dispatch({
+        type: 'REQUEST_TODOS_SUCCESS',
+        todos: data.todos
+      });
+    });
+  }
+}
+```
+
+---
+
+app/todos.js
+
+
+Within render:
+
+```js
+{ this.props.isFetching && <p>LOADING...</p> }
+```
+
+Allow it access:
+
+```js
+const ConnectedTodos = connect((state) => {
+  return {
+    todos: state.todos,
+    isFetching: state.isFetching
+  };
+})(Todos);
+```
+
+---
+
+Now we need our `todosReducer` to deal with the success action and use the data.
+
+```js
+case 'REQUEST_TODOS_SUCCESS':
+  return action.todos;
+```
+
+---
+
+Et voila (the delay is me for effect!):
+
+![inline autoplay loop](thunk.mov)
+
+---
+
+And with that we now have support for async!
+
+---
+
+# Housekeeping Actions
+
+---
+
+The strings for our actions are cropping up in a lot of places.
+
+Better to have them as constants that can be exported.
+
+```js
+export const LOG_USER_IN = 'LOG_USER_IN';
+export const LOG_USER_OUT = 'LOG_USER_OUT';
+```
+
+That way you can keep things in sync easier.
+
+---
+
+Use action creators for creating actions:
+
+```js
+export function addTodo(name) {
+  return {
+    type: ADD_TODO,
+    name
+  }
+};
+```
+
+---
+
+For more info: 
+- http://redux.js.org/docs/basics/Actions.html
+- http://redux.js.org/docs/recipes/ReducingBoilerplate.html
+
+---
+
+# You've made it!
+
+Redux is tough to get started with but the benefits in a large application are huge.
+
+- Code, notes, etc: `github.com/jackfranklin/react-redux-talk`
+- Slides (after talk): `speakerdeck.com/jackfranklin`
+- I'll tweet them all: `twitter.com/jack_franklin`
+
+---
+
+Thanks :)
 
 ---

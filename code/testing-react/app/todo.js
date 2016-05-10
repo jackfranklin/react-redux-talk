@@ -17,7 +17,6 @@ class Todo extends React.Component {
   }
 
   render() {
-    console.log('render was called');
     const className = this.props.todo.done ? 'done-todo' : '';
 
     return (
