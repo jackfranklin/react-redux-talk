@@ -1202,6 +1202,19 @@ export function fetchTodosAction() {
 
 ---
 
+Then, fetch and dispatch `REQUEST_TODOS_SUCCESS`:
+
+```js
+fetchTodos().then((data) => {
+  dispatch({
+    type: 'REQUEST_TODOS_SUCCESS',
+    todos: data.todos
+  });
+});
+```
+
+---
+
 ```js
 import { fetchTodos } from './fake-api';
 
@@ -1309,5 +1322,8 @@ Redux is tough to get started with but the benefits in a large application are h
 ---
 
 Thanks :)
+
+- @Jack_Franklin
+- javascriptplayground.com
 
 ---
