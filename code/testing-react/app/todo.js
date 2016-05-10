@@ -1,25 +1,34 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-export default class Todo extends React.Component {
+class Todo extends React.Component {
   toggleDone() {
-    this.props.doneChange(this.props.todo.id);
+    this.props.dispatch({
+      type: 'TOGGLE_TODO',
+      id: this.props.todo.id
+    });
   }
 
   deleteTodo(e) {
-    e.preventDefault();
-    this.props.deleteTodo(this.props.todo.id);
+    this.props.dispatch({
+      type: 'DELETE_TODO',
+      id: this.props.todo.id
+    });
   }
 
   render() {
-    const { todo } = this.props;
-
-    const className = todo.done ? 'done-todo' : '';
+    console.log('render was called');
+    const className = this.props.todo.done ? 'done-todo' : '';
 
     return (
-      <div className={`todo ${className} todo-${todo.id}`}>
-        <p className="toggle-todo" onClick={() => this.toggleDone() }>{ todo.name }</p>
+      <div className={`todo ${className} todo-${this.props.todo.id}`}>
+        <p className="toggle-todo" onClick={() => this.toggleDone() }>{ this.props.todo.name }</p>
         <a className="delete-todo" href="#" onClick={(e) => this.deleteTodo(e) }>Delete</a>
       </div>
     )
   }
 }
+
+const ConnectedTodo = connect()(Todo);
+
+export default ConnectedTodo;

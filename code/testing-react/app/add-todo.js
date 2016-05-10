@@ -1,12 +1,14 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-export default class AddTodo extends React.Component {
+class AddTodo extends React.Component {
   addTodo(e) {
     e.preventDefault();
     const newTodoName = this.refs.todoTitle.value;
     if (newTodoName) {
-      this.props.onNewTodo({
-        name: newTodoName
+      this.props.dispatch({
+        name: newTodoName,
+        type: 'ADD_TODO'
       });
 
       this.refs.todoTitle.value = '';
@@ -23,3 +25,7 @@ export default class AddTodo extends React.Component {
     )
   }
 }
+
+const ConnectedAddTodo = connect()(AddTodo);
+
+export default ConnectedAddTodo;
