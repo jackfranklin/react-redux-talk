@@ -25,7 +25,7 @@ slidenumbers: true
 
 ---
 
-# In the beginning
+# React without Redux
 
 ---
 
@@ -77,7 +77,11 @@ render() {
 
 Parent component contains all state.
 
-Child components are given functions to call to tell the parent component of the new state.
+Child components are given functions to call to tell the parent component about the new state.
+
+---
+
+You'll probably find this absolutely fine for smaller applications.
 
 ---
 
@@ -96,20 +100,26 @@ addTodo(todo) {
 render() {...}
 ```
 
+---
+
+The problem with this is that our component now knows how to deal with all data changes.
 
 ---
 
-But then as this component grew I pulled out the business logic into standalone JavaScript functions:
+So to keep things tidy I can pull out functions that know how to manipulate the state
 
 ---
 
 app/todos.js
 
 ```js
+import { addTodo } from './state-functions';
+
 constructor(props) {...}
 
 addTodo(todo) {
-  this.setState(addTodo(this.state, todo));
+  const newState = addTodo(this.state, todo);
+  this.setState(newState);
 }
 
 ...
@@ -127,13 +137,19 @@ export function deleteTodo(state, id) {
     todos: state.todos.filter((todo) => todo.id !== id)
   };
 }
+
+export function addTodo(state, todo) {...}
 ```
 
 ---
 
 This is effectively a very, very basic Redux (but worse in many ways!).
 
+For small applications this is a great!
+
 ---
+
+![inline](propFns.png)
 
 This is fine for small applications, but it tightly couples components and makes refactoring or restructuring components trick and makes refactoring or restructuring components tricky.
 
@@ -176,21 +192,6 @@ But don't use Redux by default! For smaller apps you'll probably find yourself q
 ---
 
 # Building a Redux application
-
----
-
-```javascript
-import { createStore } from 'redux';
-
-function counter(state, action) {
-  ...
-}
-
-const store = createStore(counter);
-
-console.log('Current state', store.getState());
-
-```
 
 ---
 
@@ -254,9 +255,25 @@ console.log('Current state', store.getState());
 ```
 ---
 
+```javascript
+import { createStore } from 'redux';
+
+function counter(state, action) {
+  ...
+}
+
+const store = createStore(counter);
+
+store.dispatch({ type: 'INCREMENT' });
+console.log('Current state', store.getState());
+
+```
+
+---
+
 # What makes this good?
 
-- The main logic is contained in a function, abstracted away from the store. It's easy to modify, follow and test.
+- Business logic is a standalone function. It's easy to modify, follow and test.
 - Nothing ever manipulates the state, all manipulation is done via actions.
 - Actions are just plain objects; they can be logged, serialised, repeated, and so on.
 - Our reducer is pure - the state is never directly mutated.
@@ -1327,3 +1344,4 @@ Thanks :)
 - javascriptplayground.com
 
 ---
+
