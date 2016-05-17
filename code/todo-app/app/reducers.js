@@ -1,11 +1,5 @@
 import { combineReducers } from 'redux';
 
-const initialTodo = {
-  name: 'buy milk',
-  id: 0,
-  done: false
-};
-
 function userReducer(user = {}, action) {
   switch (action.type) {
     case 'LOG_USER_IN':
