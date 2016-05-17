@@ -1,6 +1,7 @@
 import React from 'react';
 import Todo from './todo';
 import AddTodo from './add-todo';
+import ClearTodosButton from './clear-todos-button';
 import { connect } from 'react-redux';
 import { fetchTodosAction } from './action-creators';
 
@@ -26,6 +27,7 @@ class Todos extends React.Component {
         { this.props.isFetching && <p>LOADING...</p> }
         <p>The <em>best</em> todo app out there.</p>
         <h1>Things to get done:</h1>
+        <ClearTodosButton />
         <ul className="todos-list">{ this.renderTodos() }</ul>
         <AddTodo />
       </div>

@@ -8,6 +8,6 @@ export function fetchTodos() {
           done: false
         }]
       })
-    }, 2000);
+    }, 1);
   });
 }

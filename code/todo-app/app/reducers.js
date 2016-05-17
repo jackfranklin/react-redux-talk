@@ -47,6 +47,9 @@ function todoReducer(todos = [], action) {
     case 'REQUEST_TODOS_SUCCESS':
       return action.todos;
 
+    case 'CLEAR_TODOS':
+      return [];
+
     default:
       return todos;
   }
@@ -58,10 +61,10 @@ function isFetchingReducer(isFetching = false, action) {
      return true;
 
    case 'REQUEST_TODOS_SUCCESS':
-     return false
+     return false;
 
    default:
-     return isFetching
+     return isFetching;
  }
 }
 
