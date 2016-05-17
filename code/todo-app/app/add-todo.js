@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-class AddTodo extends React.Component {
+export class AddTodo extends React.Component {
   addTodo(e) {
     e.preventDefault();
     const newTodoName = this.refs.todoTitle.value;

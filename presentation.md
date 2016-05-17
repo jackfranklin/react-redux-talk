@@ -1292,6 +1292,10 @@ And with that we now have support for async!
 
 ---
 
+# Live coding! Adding a 'Clear' button
+
+---
+
 # Housekeeping Actions
 
 ---
