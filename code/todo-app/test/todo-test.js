@@ -4,7 +4,7 @@ import { shallow, mount } from 'enzyme';
 
 import React from 'react';
 import { Double } from 'doubler';
-import Todo from '../app/todo';
+import { Todo } from '../app/todo';
 
 import test from 'tape';
 
@@ -45,22 +45,25 @@ test('Todo component', (t) => {
     const todo = { id: 1, name: 'Buy Milk', done: false };
 
     const result = mount(
-      <Todo todo={todo} doneChange={doneCallback} />
+      <Todo todo={todo} dispatch={doneCallback} />
     );
 
     result.find('p').simulate('click');
 
     t.equal(doneCallback.callCount, 1);
-    t.deepEqual(doneCallback.args[0], [1]);
+    t.deepEqual(doneCallback.args[0][0], {
+      type: 'TOGGLE_TODO',
+      id: 1
+    });
   });
 
   t.test('deleting a TODO calls the given prop', (t) => {
     t.plan(1);
-    const deleteCallback = (id) => t.equal(id, 1);
+    const deleteCallback = ({id}) => t.equal(id, 1);
     const todo = { id: 1, name: 'Buy Milk', done: false };
 
     const result = mount(
-      <Todo todo={todo} deleteTodo={deleteCallback} />
+      <Todo todo={todo} dispatch={deleteCallback} />
     );
 
     result.find('a').simulate('click');

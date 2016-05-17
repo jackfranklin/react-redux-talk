@@ -4,10 +4,16 @@ import { shallow, mount } from 'enzyme';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Todos from '../app/todos';
-import Todo from '../app/todo';
+import { Todos } from '../app/todos';
+import { Todo } from '../app/todo';
 
 import test from 'tape';
+
+const todos = [
+  { id: 1, name: 'Buy Milk' },
+  { id: 2, name: 'Walk the dog' },
+  { id: 3, name: 'Cook food' }
+];
 
 
 test('Todos component', (t) => {

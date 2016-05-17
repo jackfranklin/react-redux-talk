@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-class Todo extends React.Component {
+export class Todo extends React.Component {
   toggleDone() {
     this.props.dispatch({
       type: 'TOGGLE_TODO',

@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { fetchTodosAction } from './action-creators';
 
 
-class Todos extends React.Component {
+export class Todos extends React.Component {
   componentWillMount() {
     this.props.dispatch(fetchTodosAction());
   }
