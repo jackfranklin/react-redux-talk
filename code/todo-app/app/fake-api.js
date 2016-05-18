@@ -3,7 +3,7 @@ export function fetchTodos() {
     setTimeout(() => {
       resolve({
         todos: [{
-          id: 1,
+          id: 0,
           name: 'Buy Milk',
           done: false
         }]

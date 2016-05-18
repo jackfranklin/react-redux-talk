@@ -29,6 +29,9 @@ function todoReducer(todos = [], action) {
     case 'DELETE_TODO':
       return todos.filter((todo) => todo.id !== action.id);
 
+    case 'CLEAR_TODOS':
+      return [];
+
     case 'TOGGLE_TODO':
       const todos = todos.map((todo) => {
         if (todo.id === action.id) {
